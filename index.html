@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Línea del Tiempo del Plan de Salvación</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #1a1611;
+            color: #f4e4bc;
+            line-height: 1.6;
+        }
+
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.9) 0%, 
+                rgba(139, 69, 19, 0.7) 50%, 
+                rgba(212, 175, 55, 0.8) 100%
+            );
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 120%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><pattern id="ancient" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M20,50 L50,20 L80,50 L50,80 Z" fill="none" stroke="%23D4AF37" stroke-width="1" opacity="0.4"/><circle cx="50" cy="50" r="3" fill="%23D4AF37" opacity="0.6"/></pattern></defs><rect width="100%" height="100%" fill="url(%23ancient)"/></svg>');
+            will-change: transform;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(0.5deg); }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            color: #f4e4bc;
+            letter-spacing: 2px;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            color: #d4af37;
+            letter-spacing: 1px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4af37;
+            animation: bounce 2s infinite;
+            font-size: 2rem;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .timeline-container {
+            width: 100%;
+            position: relative;
+            padding: 80px 0;
+            background: linear-gradient(135deg, 
+                rgba(26, 22, 17, 0.95) 0%, 
+                rgba(139, 69, 19, 0.3) 50%, 
+                rgba(26, 22, 17, 0.95) 100%
+            );
+            background-attachment: fixed;
+            background-size: cover;
+            transition: 0.3s ease 0s;
+        }
+
+        .timeline-container:before {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 22, 17, 0.4);
+            content: "";
+        }
+
+        .timeline {
+            display: flex;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            flex-direction: column;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .timeline:before {
+            position: absolute;
+            left: 50%;
+            width: 3px;
+            height: 100%;
+            margin-left: -1.5px;
+            content: "";
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(212, 175, 55, 0.8) 10%, 
+                rgba(212, 175, 55, 0.8) 90%, 
+                transparent 100%
+            );
+        }
+
+        .timeline-item {
+            padding: 50px 0;
+            opacity: 0.5;
+            filter: blur(2px);
+            transition: 0.8s ease;
+            box-sizing: border-box;
+            width: calc(50% - 50px);
+            display: flex;
+            position: relative;
+            transform: translateY(-60px);
+        }
+
+        .timeline-item:before {
+            content: attr(data-text);
+            letter-spacing: 2px;
+            width: 100%;
+            position: absolute;
+            color: rgba(212, 175, 55, 0.7);
+            font-size: 12px;
+            font-family: 'Cinzel', serif;
+            font-weight: 500;
+            border-left: 2px solid rgba(212, 175, 55, 0.7);
+            top: 60%;
+            margin-top: -5px;
+            padding-left: 20px;
+            opacity: 0;
+            right: calc(-100% - 70px);
+            text-transform: uppercase;
+        }
+
+        .timeline-item:nth-child(even) {
+            align-self: flex-end;
+        }
+
+        .timeline-item:nth-child(even):before {
+            right: auto;
+            text-align: right;
+            left: calc(-100% - 70px);
+            padding-left: 0;
+            border-left: none;
+            border-right: 2px solid rgba(212, 175, 55, 0.7);
+            padding-right: 20px;
+        }
+
+        .timeline-item--active {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0px);
+        }
+
+        .timeline-item--active:before {
+            top: 50%;
+            transition: 0.4s all 0.3s;
+            opacity: 1;
+        }
+
+        .timeline-item--active .timeline__content-title {
+            margin: -40px 0 25px 0;
+        }
+
+        .timeline__content {
+            background: rgba(26, 22, 17, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .timeline__img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            border: 2px solid rgba(212, 175, 55, 0.4);
+        }
+
+        .timeline__content-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 2.5rem;
+            margin: -10px 0 20px 0;
+            transition: 0.4s;
+            color: #d4af37;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            letter-spacing: 1px;
+        }
+
+        .timeline__content-desc {
+            margin: 0;
+            font-size: 16px;
+            color: #f4e4bc;
+            font-family: 'Crimson Text', serif;
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        .timeline__content-time {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: #d4af37;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        @media only screen and (max-width: 767px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .timeline:before {
+                left: 40px;
+            }
+
+            .timeline-item {
+                align-self: baseline !important;
+                width: 100%;
+                padding: 0 30px 100px 80px;
+            }
+
+            .timeline-item:before {
+                left: 10px !important;
+                padding: 0 !important;
+                top: 60px;
+                text-align: center !important;
+                width: 60px;
+                border: none !important;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 40px;
+            }
+
+            .timeline__content-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>Línea del tiempo del plan de salvación</h1>
+            <p>Un recorrido visual a través de la historia sagrada</p>
+        </div>
+        <div class="scroll-indicator">↓</div>
+    </section>
+
+    <div id="timeline-1" class="timeline-container">
+        <div class="timeline">
+            <div class="timeline-item" data-text="Creación y Orígenes">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-1.jpg" alt="Creación y Orígenes">
+                    <div class="timeline__content-time">Tiempo: Los Orígenes</div>
+                    <h2 class="timeline__content-title">Creación y Orígenes</h2>
+                    <p class="timeline__content-desc">
+                        Dios crea el cielo, la tierra y al hombre a imagen y semejanza suya. Adán y Eva desobedecen. El hombre quiso ser como Dios. El pecado entra al hombre, trayendo consigo separación de la relación con Dios y muerte entre hermanos. A Dios le pesa haber creado al hombre, pero halló gracia en Noé y fue salvo él y su familia. Alianza con el hombre, signo: El arcoíris.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Los Patriarcas">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-2.jpg" alt="Los Patriarcas">
+                    <div class="timeline__content-time">1850-1650 a.C.</div>
+                    <h2 class="timeline__content-title">Los Patriarcas</h2>
+                    <p class="timeline__content-desc">
+                        Vocación de Abram, decide escuchar y creer en Dios, ahora su nombre es Abraham porque será padre de una multitud de naciones. Abraham Padre de la fe. Abraham y Sara decidieron acelerar los planes de Dios, de ahí su hijo Ismael, pero no fue el hijo de la Promesa de Dios, pues Dios prometió hijo de Abraham y Sara. Isaac hijo de la promesa de Dios. Migración de diversos grupos a Canaán. Promesas: Tierra, descendencia y bendición. Jacob hijo de Isaac, y sus hijos en Egipto.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Éxodo, Liberación, Alianza y Desierto">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-3.jpg" alt="Éxodo, Liberación, Alianza y Desierto">
+                    <div class="timeline__content-time">1250-1230 a.C.</div>
+                    <h2 class="timeline__content-title">Éxodo, Liberación, Alianza y Desierto</h2>
+                    <p class="timeline__content-desc">
+                        Pueblo esclavizado. Opresión en Egipto. Revelación y acción liberadora de Yahvé por medio de Moisés. Éxodo, acontecimiento fundante, camino por el desierto, alianza y ley en el Sinaí. Formación del pueblo. Desierto, tiempo de prueba.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Conquista y Jueces">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-4.jpg" alt="Conquista y Jueces">
+                    <div class="timeline__content-time">1230-1030 a.C.</div>
+                    <h2 class="timeline__content-title">Conquista y Jueces</h2>
+                    <p class="timeline__content-desc">
+                        Bajo el mando de Josué, sucesor de Moisés, el pueblo cruza el Jordán, conquista Jericó y las demás ciudades. Reparto de tierra por Josué entre las doce tribus de Israel. (Israel antes llamado Jacob, tuvo 12 hijos de ahí las doce tribus) Tribus unidas parcialmente. Jueces libertadores de Israel. A la muerte de Josué, el pueblo olvida la alianza con su Dios pecando; pueblos extranjeros los oprimen, como castigo de Dios, y solo cuando el pueblo se arrepiente, Dios suscita jueces que son los libertadores. Pueblos unidos religiosamente, pero no políticamente. Dios fiel cumple sus promesas. Salva ante el arrepentimiento del pueblo que ha sido infiel.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Monarquía Unida">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-5.jpg" alt="Monarquía unida">
+                    <div class="timeline__content-time">1030-931 a.C.</div>
+                    <h2 class="timeline__content-title">Monarquía Unida</h2>
+                    <p class="timeline__content-desc">
+                        Samuel, juez y creador de reyes. Monarquía unida: Saúl (ca. 1030-1010), David (ca. 1010-971), Salomón (ca. 971-931). Expansión imperio davídico - salomónico. Dios le promete a David una casa = una dinastía perpetua en el trono de Judá; este es el germen del mesianismo davídico. Pecado y arrepentimiento de David. Dios rey. Monarquía, dos visiones: rechazo a Dios y/o liberación divina.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="División de los Reinos">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-6.jpg" alt="División de los Reinos">
+                    <div class="timeline__content-time">931-586 a.C.</div>
+                    <h2 class="timeline__content-title">División de los Reinos</h2>
+                    <p class="timeline__content-desc">
+                        Dos reinos: Israel o Norte (931-722), Samaria cae ante Asiria; Judá o Sur (931-586), Jerusalén cae ante Babilonia. Sometidos a imperios. Profetismo preexílico: denuncia y amenaza. Reformas de Ezequías (VIII) y Josías (VII) en Judá. Hallazgo del libro de la Ley (622). Dios interpela a su pueblo infiel, que no escucha su palabra. Por eso lo "castiga". Se vislumbra la salvación futura.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Exilio en Babilonia">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-7.jpg" alt="Exilio en Babilonia">
+                    <div class="timeline__content-time">586-539 a.C.</div>
+                    <h2 class="timeline__content-title">Exilio en Babilonia</h2>
+                    <p class="timeline__content-desc">
+                        El pueblo ha perdido patria, rey, templo, etc. Unos en Babilonia, otros en la tierra desolada. Desaliento, reflexión y conversión. Surgen los profetas Ezequiel e Isaías II. La tradición sacerdotal insiste en la unidad a través de la pertenencia al pueblo, de las tradiciones y la ley, y del culto, y da una visión esperanzadora. Destierro en Babilonia. Pérdida de "seguridades": templo, ciudad, tierra, monarquía (fin de independencia política). Profetismo exílico: consolación y esperanza. Inicio del judaísmo. Dios por pura gracia salva a su pueblo, promete una nueva alianza y renovación total.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Restauración y Época Persa">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-8.jpg" alt="Restauración y Época Persa">
+                    <div class="timeline__content-time">539-333 a.C.</div>
+                    <h2 class="timeline__content-title">Restauración y Época Persa</h2>
+                    <p class="timeline__content-desc">
+                        Judá sometida a ptolomeos y seléucidas. Rebelión macabea ante persecución de Antíoco IV Epífanes (167-164). Grupos en judaísmo: fariseos, saduceos y esenios. Ruptura con samaritanos. Movimiento sapiencial y apocalíptico. Decreto de Ciro, rey de Persia, permitiendo el retorno de judíos a Jerusalén (538) finalizando así el exilio. No todos regresan, una gran parte se queda en Babilonia, donde surgirá una comunidad judía importante. Dios aviva la esperanza de la salvación.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item" data-text="Época Griega y Romana">
+                <div class="timeline__content">
+                    <img class="timeline__img" src="images/event-9.jpg" alt="Época Griega y Romana">
+                    <div class="timeline__content-time">333-63 a.C.</div>
+                    <h2 class="timeline__content-title">Época Griega y Romana</h2>
+                    <p class="timeline__content-desc">
+                        Alejandro Magno conquistador: Palestina bajo Grecia. Poco después de su muerte, los Ptolomeos o Lágidas, generales egipcios de cultura griega, dominan Palestina (314-197); le siguen los Seléucidas (197-142). Diversos grupos en el judaísmo, esenios, fariseos, y saduceos. Encarnación del Hijo de Dios. Ministerio de Jesús: proclama e instaura el Reinado de Dios enviado por su Padre y con la fuerza del Espíritu. Camino de Jesús y misterio pascual, acontecimiento fundante. Dios se revela en la plenitud del tiempo por su Hijo, que por amor se entrega y asume los riesgos de su vida. En su sangre se sella la nueva Alianza.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function($) {
+            $.fn.timeline = function() {
+                var selectors = {
+                    id: $(this),
+                    item: $(this).find(".timeline-item"),
+                    activeClass: "timeline-item--active",
+                    img: ".timeline__img"
+                };
+                
+                selectors.item.eq(0).addClass(selectors.activeClass);
+                selectors.id.css(
+                    "background-image",
+                    "url(" + selectors.item.first().find(selectors.img).attr("src") + ")"
+                );
+                
+                var itemLength = selectors.item.length;
+                
+                $(window).scroll(function() {
+                    var max, min;
+                    var pos = $(this).scrollTop();
+                    
+                    selectors.item.each(function(i) {
+                        min = $(this).offset().top;
+                        max = $(this).height() + $(this).offset().top;
+                        
+                        if (i == itemLength - 2 && pos > min + $(this).height() / 2) {
+                            selectors.item.removeClass(selectors.activeClass);
+                            selectors.id.css(
+                                "background-image",
+                                "url(" + selectors.item.last().find(selectors.img).attr("src") + ")"
+                            );
+                            selectors.item.last().addClass(selectors.activeClass);
+                        } else if (pos <= max - 40 && pos >= min) {
+                            selectors.id.css(
+                                "background-image",
+                                "url(" + $(this).find(selectors.img).attr("src") + ")"
+                            );
+                            selectors.item.removeClass(selectors.activeClass);
+                            $(this).addClass(selectors.activeClass);
+                        }
+                    });
+                });
+            };
+        })(jQuery);
+
+        $(document).ready(function() {
+            $("#timeline-1").timeline();
+        });
+    </script>
+</body>
+</html>
